@@ -50,12 +50,19 @@ def process_images(
         right_eye_image = shift_pixels(color_image, depth_map, -1)
 
         frame_number = color_image_path.split('color')[1].split('.')[0]
-        left_eye_output_path = os.path.join(output_dir, f'leftEye{frame_number}.jpg')
-        right_eye_output_path = os.path.join(output_dir, f'rightEye{frame_number}.jpg')
+
+        if not os.path.exists(os.path.join(output_dir,'leftEye')):
+            os.makedirs(os.path.join(output_dir,'leftEye'))      
+        if not os.path.exists(os.path.join(output_dir,'rightEye')):
+            os.makedirs(os.path.join(output_dir,'rightEye'))
+        
+        left_eye_output_path = os.path.join(output_dir, f'leftEye/leftEye{frame_number}.jpg')
+        right_eye_output_path = os.path.join(output_dir, f'rightEye/rightEye{frame_number}.jpg')
 
         # Save the left and right eye images
         cv2.imwrite(left_eye_output_path, left_eye_image)
         cv2.imwrite(right_eye_output_path, right_eye_image)
+
 
         typer.echo(f"Processed frame {frame_number}.")
 
