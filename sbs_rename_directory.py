@@ -1,4 +1,5 @@
 import os
+import re
 
 dataset_directory = 'datasets/d3/'
 
@@ -22,8 +23,11 @@ for filename in frame_files:
 target_prefix = "depth"
 
 def get_frame_number(filename):
-    return int(filename.split("frame")[1].split(".")[0])
-
+    match = re.search(r"frame(\d+)_", filename)
+    if match:
+        return int(match.group(1))
+    else:
+        raise ValueError(f"Invalid filename format: {filename}")
 
 file_list = os.listdir(source_dir)
 frame_files = sorted([f for f in file_list if f.startswith("frame") and f.endswith(".png")], key=get_frame_number)
