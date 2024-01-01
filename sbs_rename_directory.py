@@ -1,26 +1,8 @@
 import os
 import re
+import typer
 
-dataset_directory = 'datasets/d3/'
-
-source_dir =  dataset_directory + "rgbd_in/"
-os.makedirs(source_dir, exist_ok=True)
-target_prefix = "color"
-
-def get_frame_number(filename):
-    return int(filename.split("frame")[1].split(".")[0])
-
-
-file_list = os.listdir(source_dir)
-frame_files = sorted([f for f in file_list if f.startswith("frame") and f.endswith(".jpg")], key=get_frame_number)
-counter = 0
-
-for filename in frame_files:
-    new_name = f"{target_prefix}{counter}.jpg"
-    os.rename(os.path.join(source_dir, filename), os.path.join(source_dir, new_name))
-    counter += 1
-
-target_prefix = "depth"
+app = typer.Typer()
 
 def get_frame_number(filename):
     match = re.search(r"frame(\d+)_", filename)
@@ -29,11 +11,29 @@ def get_frame_number(filename):
     else:
         raise ValueError(f"Invalid filename format: {filename}")
 
-file_list = os.listdir(source_dir)
-frame_files = sorted([f for f in file_list if f.startswith("frame") and f.endswith(".png")], key=get_frame_number)
-counter = 0
+@app.command()
+def rename_files(source_dir: str = typer.Argument(..., help="Path to the input directory containing color and depth images")):
+    os.makedirs(source_dir, exist_ok=True)
 
-for filename in frame_files:
-    new_name = f"{target_prefix}{counter}.png"
-    os.rename(os.path.join(source_dir, filename), os.path.join(source_dir, new_name))
-    counter += 1
+    # Process color images
+    color_files = sorted([f for f in os.listdir(source_dir) if f.startswith("frame") and f.endswith(".jpg")], 
+                         key=lambda x: int(x.split("frame")[1].split(".")[0]))
+    counter = 0
+    for filename in color_files:
+        new_name = f"color{counter}.jpg"
+        os.rename(os.path.join(source_dir, filename), os.path.join(source_dir, new_name))
+        counter += 1
+    print(f"Renamed {counter} color files in {source_dir}.")
+
+    # Process depth images
+    depth_files = sorted([f for f in os.listdir(source_dir) if f.startswith("frame") and f.endswith(".png")], 
+                         key=get_frame_number)
+    counter = 0
+    for filename in depth_files:
+        new_name = f"depth{counter}.png"
+        os.rename(os.path.join(source_dir, filename), os.path.join(source_dir, new_name))
+        counter += 1
+    print(f"Renamed {counter} depth files in {source_dir}.")
+
+if __name__ == "__main__":
+    app()

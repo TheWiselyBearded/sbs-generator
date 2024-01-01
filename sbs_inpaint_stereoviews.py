@@ -27,7 +27,8 @@ def inpaint_black_streaks(image, mask):
 @app.command()
 def process_images(
     input_dir: str = typer.Argument(..., help="Path to the input directory containing left and right eye image pairs"),
-    output_dir: str = typer.Argument(..., help="Path to the output directory for processed images"),
+    output_dir: str = typer.Argument(..., help="Path to the output directory for processed images"),    
+    save_masks: bool = typer.Option(False, help="Flag to save the masks")
 ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -35,6 +36,12 @@ def process_images(
         os.makedirs(os.path.join(output_dir,'leftEye'))
     if not os.path.exists(os.path.join(output_dir,'rightEye')):
         os.makedirs(os.path.join(output_dir,'rightEye'))
+
+    if save_masks:
+        if not os.path.exists(os.path.join(output_dir,'leftEyeMask')):
+            os.makedirs(os.path.join(output_dir,'leftEyeMask'))
+        if not os.path.exists(os.path.join(output_dir,'rightEyeMask')):
+            os.makedirs(os.path.join(output_dir,'rightEyeMask'))
 
     left_path = input_dir + "leftEye/"
     right_path = input_dir + "rightEye/"
@@ -65,19 +72,15 @@ def process_images(
 
         left_eye_post_output_path = os.path.join(output_dir + "leftEye/", f'leftEyePost{frame_number}.jpg')
         right_eye_post_output_path = os.path.join(output_dir + "rightEye/", f'rightEyePost{frame_number}.jpg')   
-        # for eye masks
-        if not os.path.exists(os.path.join(output_dir,'leftEyeMask')):
-            os.makedirs(os.path.join(output_dir,'leftEyeMask'))
-        if not os.path.exists(os.path.join(output_dir,'rightEyeMask')):
-            os.makedirs(os.path.join(output_dir,'rightEyeMask'))
-        left_eye_mask_output_path = os.path.join(output_dir + "leftEyeMask/", f'leftEyeMask{frame_number}.jpg')
-        right_eye_mask_output_path = os.path.join(output_dir + "rightEyeMask/", f'rightEyeMask{frame_number}.jpg')
-
         # Save the processed images and masks
         cv2.imwrite(left_eye_post_output_path, left_eye_post)
         cv2.imwrite(right_eye_post_output_path, right_eye_post)
-        cv2.imwrite(left_eye_mask_output_path, left_eye_mask)
-        cv2.imwrite(right_eye_mask_output_path, right_eye_mask)
+        
+        if save_masks:
+            left_eye_mask_output_path = os.path.join(output_dir + "leftEyeMask/", f'leftEyeMask{frame_number}.jpg')
+            right_eye_mask_output_path = os.path.join(output_dir + "rightEyeMask/", f'rightEyeMask{frame_number}.jpg')
+            cv2.imwrite(left_eye_mask_output_path, left_eye_mask)
+            cv2.imwrite(right_eye_mask_output_path, right_eye_mask)
 
         typer.echo(f"Processed frame {frame_number}.")
 
