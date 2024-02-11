@@ -1,3 +1,6 @@
 RETIRED/*
 .DS_Store
 datasets/*
+!datasets/.gitkeep 
+depth_models/*
+!depth_models/.gitkeep 
